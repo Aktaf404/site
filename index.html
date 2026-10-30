@@ -260,10 +260,16 @@
             'Offline': 'OFFLINE',
             'Unknown': 'UNKNOWN'
         };
+        const STATIC_MIRROR = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
         async function refreshAgents() {
             if (!agentsList) return;
+            if (STATIC_MIRROR) {
+                if (agentsCnt) agentsCnt.textContent = 'STATIC';
+                agentsList.innerHTML = '<div class="agent-task">Mirror statis — status crew live cuma jalan di server homelab.</div>';
+                return;
+            }
             try {
-                const res = await fetch('/api/agents');
+                const res = await fetch('api/agents');
                 if (!res.ok) throw new Error('agents ' + res.status);
                 const json = await res.json();
                 const agents = json.agents || [];
