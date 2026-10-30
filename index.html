@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PORTFOLIO // 3D CYBERPUNK HUD</title>
+    <link rel="stylesheet" href="/css/hud.css">
+    
+    <!-- ES Module Import Map for Three.js -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+    </script>
+</head>
+<body>
+
+    <!-- 3D Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Scanline & Vignette Effect -->
+    <div class="scanlines"></div>
+
+    <!-- HUD Overlay -->
+    <div class="hud-overlay">
+
+        <!-- TOP HEADER -->
+        <header class="hud-header hud-interactive">
+            <div class="hud-title-group">
+                <span class="hud-badge">SYS:ONLINE</span>
+                <div>
+                    <div class="hud-hostname" id="hud-hostname">PORTFOLIO</div>
+                    <div class="hud-os" id="hud-os">Cyber Core 6.8</div>
+                    <div id="hud-identity" class="hud-identity">LOADING IDENTITY...</div>
+                </div>
+            </div>
+
+            <div class="hud-header-actions">
+                <button class="hud-btn" id="btn-contact" title="Buka Panel Kontak / Link">CONTACT ▸</button>
+                <div class="hud-status-indicator">
+                    <div class="status-dot" id="hud-status-dot"></div>
+                    <span id="hud-status-text">CONNECTING...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN BODY METRICS PANELS -->
+        <main class="hud-body">
+            
+            <!-- LEFT PANEL: CPU & THERMAL -->
+            <div class="panel-col">
+                <!-- CPU CARD -->
+                <div class="hud-card hud-interactive">
+                    <div class="card-title">
+                        <span>CPU LOAD</span>
+                        <span id="hud-cpu-brand">Intel Core</span>
+                    </div>
+                    <div class="card-value" id="val-cpu">0<span>%</span></div>
+                    <div class="hud-progress-track">
+                        <div class="hud-progress-fill" id="fill-cpu"></div>
+                    </div>
+                    <!-- Core Mini Bars -->
+                    <div class="core-bars-container" id="hud-core-bars"></div>
+                </div>
+
+                <!-- THERMAL / TEMP CARD -->
+                <div class="hud-card hud-interactive">
+                    <div class="card-title">
+                        <span>THERMAL TEMP</span>
+                        <span id="sub-temp">NORMAL</span>
+                    </div>
+                    <div class="card-value" id="val-temp">0<span>°C</span></div>
+                    <div class="hud-progress-track">
+                        <div class="hud-progress-fill" id="fill-temp"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: MEMORY, DISK & NETWORK -->
+            <div class="panel-col panel-col-right">
+                <!-- RAM CARD -->
+                <div class="hud-card hud-interactive">
+                    <div class="card-title">
+                        <span>SYSTEM MEMORY</span>
+                        <span id="sub-ram">0 / 0 GB</span>
+                    </div>
+                    <div class="card-value" id="val-ram">0<span>GB</span></div>
+                    <div class="hud-progress-track">
+                        <div class="hud-progress-fill" id="fill-ram"></div>
+                    </div>
+                </div>
+
+                <!-- DISK STORAGE -->
+                <div class="hud-card hud-interactive">
+                    <div class="card-title">
+                        <span>STORAGE (NVMe/SSD)</span>
+                        <span id="sub-disk">0 / 0 GB</span>
+                    </div>
+                    <div class="card-value" id="val-disk">0<span>%</span></div>
+                    <div class="hud-progress-track">
+                        <div class="hud-progress-fill" id="fill-disk"></div>
+                    </div>
+                </div>
+
+                <!-- NETWORK REALTIME -->
+                <div class="hud-card hud-interactive">
+                    <div class="card-title">
+                        <span>NET TRAFFIC</span>
+                        <span id="sub-net-iface">IFACE: eth0</span>
+                    </div>
+                    <div class="net-row">
+                        <div>
+                            <div class="card-subtext">▼ DL</div>
+                            <div class="card-value card-value-sm" id="val-net-rx">0<span>kB/s</span></div>
+                        </div>
+                        <div>
+                            <div class="card-subtext">▲ UL</div>
+                            <div class="card-value card-value-sm-magenta" id="val-net-tx">0<span>kB/s</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER PANEL: SKILLS + PROJECT CARDS -->
+            <div class="panel-col-center">
+
+                <!-- AI CREW STATUS (live from Ruang) -->
+                <div class="hud-card hud-interactive" id="card-agents">
+                    <div class="card-title">
+                        <span>AI CREW // LIVE STATUS</span>
+                        <span class="card-title-actions">
+                            <span id="sub-agents-cnt">0 AGENTS</span>
+                            <button class="hud-min-btn" id="btn-min-agents" data-card="card-agents" title="Slide Ke Kanan / Expand Tab">–</button>
+                        </span>
+                    </div>
+                    <div id="agents-list"></div>
+                </div>
+
+                <!-- SKILLS HOLO CARD -->
+                <div class="hud-card hud-interactive" id="card-skills">
+                    <div class="card-title">
+                        <span>SKILL MATRIX</span>
+                        <span class="card-title-actions">
+                            <span id="sub-skills-cnt">0 MODULES</span>
+                            <button class="hud-min-btn" id="btn-min-skills" data-card="card-skills" title="Slide Ke Kanan / Expand Tab">–</button>
+                        </span>
+                    </div>
+                    <div id="skills-list"></div>
+                </div>
+
+                <!-- PROJECT SHOWCASE -->
+                <div class="hud-card hud-interactive" id="card-projects">
+                    <div class="card-title">
+                        <span>ARCHIVE // PROJECTS</span>
+                        <span class="card-title-actions">
+                            <span id="sub-projects-cnt">0 ENTRIES</span>
+                            <button class="hud-min-btn" id="btn-min-projects" data-card="card-projects" title="Slide Ke Kanan / Expand Tab">–</button>
+                        </span>
+                    </div>
+                    <div id="project-grid"></div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BOTTOM TOOLBAR & FOOTER -->
+        <footer class="hud-footer">
+            <div id="hud-uptime">UPTIME: 0h 0m 0s</div>
+
+            <!-- Interactive Toolbar (Touch Friendly) -->
+            <div class="hud-toolbar hud-interactive">
+                <button class="hud-btn active" id="btn-rotate" title="Toggle Rotasi Otomatis">⟳ ROTATE</button>
+                <button class="hud-btn" id="btn-reset" title="Reset Posisi Kamera">⌖ RESET</button>
+                <button class="hud-btn" id="btn-sound" title="Efek Suara Sci-Fi">🔈 SFX OFF</button>
+                <button class="hud-btn" id="btn-theme" title="Ganti Warna Tema">🎨 CYAN</button>
+                <button class="hud-btn" id="btn-fullscreen" title="Layar Penuh">⛶ FULLSCREEN</button>
+            </div>
+
+            <div class="hud-tagline">PMX-V3.8 // 3D-HUD · PORTFOLIO</div>
+        </footer>
+
+    </div>
+
+    <!-- CONTACT DRAWER: geser masuk dari kanan -->
+    <aside class="hud-drawer" id="drawer-contact" aria-hidden="true">
+        <div class="drawer-head">
+            <span class="drawer-title">CONTACT //</span>
+            <button class="hud-btn" id="btn-close-contact" title="Tutup Panel">✕</button>
+        </div>
+        <div class="drawer-label">LINK // REACH OUT</div>
+        <div class="drawer-body" id="drawer-contact-body"></div>
+        <div class="drawer-foot">BILLAH AKTAFI · JAKARTA PUSAT, ID</div>
+    </aside>
+
+    <!-- Scripts: Data Portofolio Dulu, Lalu Scene & Controller -->
+    <script src="/js/portfolio-data.js"></script>
+    <script>
+        (function renderPortfolio() {
+            const d = window.PORTFOLIO_DATA;
+            if (!d) return;
+            const byId = id => document.getElementById(id);
+            if (d.identity) {
+                byId('hud-identity').textContent = `${d.identity.name} · ${d.identity.role} · ${d.identity.location}`;
+            }
+            if (Array.isArray(d.skills)) {
+                byId('sub-skills-cnt').textContent = `${d.skills.length} MODULES`;
+                                byId('skills-list').innerHTML = d.skills.map(s => `
+                    <div class="skill-row">
+                        <div class="skill-row-head">
+                            <span>${s.name}</span><span>${s.level}%</span>
+                        </div>
+                        <div class="hud-progress-track skill-track">
+                            <div class="hud-progress-fill skill-fill" style="width:${s.level}%;background:${s.color || 'var(--neon-cyan)'};"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            if (Array.isArray(d.projects)) {
+                byId('sub-projects-cnt').textContent = `${d.projects.length} ENTRIES`;
+                                byId('project-grid').innerHTML = d.projects.map(p => `
+                    <div class="project-card hud-interactive">
+                        <div class="project-card-head">
+                            <span class="project-card-title">${p.title}</span>
+                            <span class="hud-badge project-badge">${p.status || 'WIP'}</span>
+                        </div>
+                        <div class="card-category">${p.category}</div>
+                        <div class="project-desc">${p.desc}</div>
+                        <div class="project-tech">
+                            ${(p.tech || []).map(t => `<span class="tech-tag">${t}</span>`).join('')}
+                        </div>
+                        <div class="project-links">
+                            ${p.link && p.link !== '#' ? `<a href="${p.link}" target="_blank" rel="noopener" class="link-demo">DEMO →</a>` : ''}
+                            ${p.gh ? `<a href="${p.gh}" target="_blank" rel="noopener" class="link-gh">GITHUB →</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            if (d.footer && d.footer.contact) {
+                const footerLine = document.querySelector('.hud-footer > div:last-child');
+                if (footerLine) footerLine.insertAdjacentHTML('beforebegin', `<div id="hud-contact" class="hud-contact">CONTACT: ${d.footer.contact}</div>`);
+            }
+            if (d.social) {
+                const labels = { github: 'github', linkedin: 'linkedin', x: 'X / TWITTER', email: 'EMAIL', whatsapp: 'WHATSAPP' };
+                byId('drawer-contact-body').innerHTML = Object.entries(d.social)
+                    .filter(([, v]) => v && v.trim() !== '')
+                    .map(([k, v]) => `<a class="drawer-link" href="${v}" target="_blank" rel="noopener"><span>${(labels[k]||k).toUpperCase()}</span><b>/${k}</b></a>`).join('');
+            }
+        })();
+
+        // === AI CREW LIVE STATUS (Ruang proxy) ===
+        const agentsList = document.getElementById('agents-list');
+        const agentsCnt = document.getElementById('sub-agents-cnt');
+        const AGENT_STATES = {
+            'Collaborating': 'ACTIVE',
+            'Working': 'ACTIVE',
+            'Idle': 'IDLE',
+            'Offline': 'OFFLINE',
+            'Unknown': 'UNKNOWN'
+        };
+        async function refreshAgents() {
+            if (!agentsList) return;
+            try {
+                const res = await fetch('/api/agents');
+                if (!res.ok) throw new Error('agents ' + res.status);
+                const json = await res.json();
+                const agents = json.agents || [];
+                if (agentsCnt) agentsCnt.textContent = agents.length + ' AGENTS';
+                agentsList.innerHTML = agents.map(a => {
+                    const badge = AGENT_STATES[a.state] || a.state;
+                    const isOn = a.state === 'Collaborating';
+                    return `
+                    <div class="agent-row">
+                        <div class="agent-row-head">
+                            <span class="agent-name">${a.name}</span>
+                            <span class="hud-badge project-badge ${isOn ? 'agent-badge-on' : 'agent-badge-off'}">${badge}</span>
+                        </div>
+                        <div class="card-category">${a.role || ''} · ${a.room || ''}</div>
+                        <div class="agent-task">${a.currentTask || '—'}</div>
+                        <div class="agent-activity">${a.activity || ''}</div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                if (agentsList) agentsList.innerHTML = '<div class="agent-task">UNAVAILABLE — OFFICE OFFLINE</div>';
+            }
+        }
+        refreshAgents();
+        setInterval(refreshAgents, 15000);
+
+        // Minimize / Expand cards — slide ke kanan jadi vertical sidebar tab
+        document.querySelectorAll('.hud-min-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = document.getElementById(btn.dataset.card);
+                if (!card) return;
+                const minimized = card.classList.toggle('minimized');
+                btn.textContent = minimized ? '+' : '–';
+                const docked = document.querySelectorAll('.hud-card.minimized').length > 0;
+                document.querySelector('.hud-body').classList.toggle('docked', docked);
+            });
+        });
+            // Contact Drawer toggle (off-canvas kanan)
+        const drawer = document.getElementById('drawer-contact');
+        const openBtn = document.getElementById('btn-contact');
+        const closeBtn = document.getElementById('btn-close-contact');
+        const setDrawer = open => {
+            drawer.classList.toggle('open', open);
+            drawer.setAttribute('aria-hidden', String(!open));
+            openBtn.classList.toggle('active', open);
+        };
+        if (openBtn) openBtn.addEventListener('click', () => setDrawer(true));
+        if (closeBtn) closeBtn.addEventListener('click', () => setDrawer(false));
+        // Escape / klik area non-drawer menutup panel
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawer(false); });
+
+        // === THEME SWITCHER (fitur 2) ===
+        const themes = ['cyan', 'magenta', 'amber'];
+        const themeBtn = document.getElementById('btn-theme');
+        const savedTheme = localStorage.getItem('hud-theme') || 'cyan';
+        if (savedTheme !== 'cyan') {
+            document.body.setAttribute('data-theme', savedTheme);
+            if (themeBtn) themeBtn.textContent = '🎨 ' + savedTheme.toUpperCase();
+        }
+        if (themeBtn) themeBtn.addEventListener('click', () => {
+            const cur = document.body.getAttribute('data-theme') || 'cyan';
+            const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+            if (next === 'cyan') document.body.removeAttribute('data-theme');
+            else document.body.setAttribute('data-theme', next);
+            localStorage.setItem('hud-theme', next);
+            themeBtn.textContent = '🎨 ' + next.toUpperCase();
+        });
+
+        // === EASTER EGG TERMINAL (fitur 4) ===
+        // Buka: ketik KONAMI (↑↑↓↓←→←→BA) atau klik hostname 5x
+        (function easterEgg() {
+            const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+            let pos = 0;
+            const term = document.createElement('div');
+            term.id = 'easter-terminal';
+            term.style.cssText = 'position:fixed;inset:0;background:rgba(3,6,14,0.97);z-index:999999;display:none;flex-direction:column;padding:20px;font-family:var(--hud-font);';
+            term.innerHTML = '<div style="color:var(--neon-green);font-size:13px;margin-bottom:10px;">ROOT@PMX-V3.8 // HACKER MODE <span style="float:right;cursor:pointer" id="eg-close">[✕ CLOSE]</span></div><div id="eg-out" style="flex:1;overflow-y:auto;color:var(--neon-green);font-size:12px;line-height:1.7;white-space:pre-wrap;"></div><div style="display:flex;gap:8px;margin-top:10px;"><span style="color:var(--neon-cyan)">$</span><input id="eg-in" style="flex:1;background:none;border:none;outline:none;color:var(--neon-green);font-family:var(--hud-font);font-size:12px;caret-color:var(--neon-green);"></div>';
+            document.body.appendChild(term);
+
+            const out = term.querySelector('#eg-out');
+            const inp = term.querySelector('#eg-in');
+            const logs = [];
+            const reply = t => { logs.push(t); out.textContent = logs.join('\n'); out.scrollTop = out.scrollHeight; };
+            const close = () => { term.style.display = 'none'; inp.value = ''; };
+            term.querySelector('#eg-close').addEventListener('click', close);
+            term.addEventListener('click', () => inp.focus());
+
+            const cmds = {
+                help: 'Available: help, whoami, ls, uname, uptime, sudo, clear',
+                whoami: 'guest@pmx-v3.8 — a curious visitor (or maybe the owner?)',
+                ls: 'portfolio-data.js  hud-controller.js  three-scene.js  secrets/',
+                'ls secrets': 'just kidding. nothing here. 👀',
+                uname: 'PMX-V3.8 3D-HUD-OS 6.8.12-43-pve x86_64 GNU/Linux',
+                sudo: 'permission denied. you are not billah.',
+                clear: '__CLEAR__',
+            };
+            inp.addEventListener('keydown', e => {
+                if (e.key !== 'Enter') return;
+                const cmd = inp.value.trim().toLowerCase();
+                if (!cmd) return;
+                logs.push('$ ' + cmd);
+                if (cmd === 'clear') { logs.length = 0; reply(''); }
+                else if (cmds[cmd]) reply(cmds[cmd]);
+                else if (cmd === 'uptime') reply('up since the day this mini pc decided to be a server. 🌱');
+                else reply('command not found: ' + cmd + ' — type "help"');
+                inp.value = '';
+            });
+
+            function open() {
+                term.style.display = 'flex';
+                reply('▓▓▓ ACCESS GRANTED ▓▓▓');
+                reply('welcome, hacker. type "help".');
+                inp.focus();
+            }
+            document.addEventListener('keydown', e => {
+                const k = e.key;
+                if (k.toLowerCase() === seq[pos] || k === seq[pos]) { pos++; if (pos === seq.length) { open(); pos = 0; } }
+                else pos = (k.toLowerCase() === seq[0]) ? 1 : 0;
+            });
+            let clicks = 0, timer = null;
+            const host = document.getElementById('hud-hostname');
+            if (host) host.addEventListener('click', () => {
+                clicks++; clearTimeout(timer); timer = setTimeout(() => clicks = 0, 1500);
+                if (clicks >= 5) { clicks = 0; open(); }
+            });
+        })();
+    </script>
+    <script type="module" src="/js/three-scene.js"></script>
+    <script src="/js/hud-controller.js"></script>
+    <script type="module">
+        window.addEventListener('DOMContentLoaded', () => {
+            const scene = new window.CyberpunkMiniPCScene('canvas-container');
+            const hud = new window.HUDController(scene);
+        });
+    </script>
+</body>
+</html>
